@@ -1,0 +1,11 @@
+Import('env')
+
+env_sd = env.Clone()
+env_sd.add_source_files(env.modules_sources, "*.cpp")
+
+env_sd.Append(CPPPATH=["ggml/src/", "ggml/include/", "ggml/ggml/src/", "ggml/ggml/include/", "stable-diffusion/", "stable-diffusion/thirdparty"])
+env_sd.Append(LIBPATH=["libs"])
+
+env_sd.Append(LIBS=["ggml", "stable-diffusion"])
+
+env_sd.Append(CCFLAGS=["-O2"])
