@@ -212,9 +212,13 @@ bool StableDiffusion::txt2img(
 }
 
 Ref<ImageTexture> StableDiffusion::get_result(int result) const {
-	if !(m_results.size()) return Ref<ImageTexture>();
+	if (!m_results.size()) return Ref<ImageTexture>();
 
 	return m_results[result];
+}
+
+int StableDiffusion::get_num_cpus() const {
+	return get_num_physical_cores();
 }
 
 int StableDiffusion::get_n_threads() const {
@@ -559,6 +563,8 @@ void StableDiffusion::_bind_methods() {
 	);
 
 	ClassDB::bind_method(D_METHOD("get_result", "result"), &StableDiffusion::get_result, DEFVAL(0));
+
+	ClassDB::bind_method(D_METHOD("get_num_cpus"), &StableDiffusion::get_num_cpus);
 
 	ClassDB::bind_method(D_METHOD("set_n_threads", "n_threads"), &StableDiffusion::set_n_threads, DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("get_n_threads"), &StableDiffusion::get_n_threads);

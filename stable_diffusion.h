@@ -140,6 +140,8 @@ public:
 
 	Ref<ImageTexture> get_result(int result = 0) const;
 
+	int get_num_cpus() const;
+
 	// Parameters
 	int get_n_threads() const;
 	void set_n_threads(int n_threads=-1);
