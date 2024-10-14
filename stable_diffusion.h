@@ -138,6 +138,8 @@ public:
 			Ref<ImageTexture> control_image = Ref<ImageTexture>()
 	); // meow
 
+	Ref<ImageTexture> get_result(int result = 0) const;
+
 	// Parameters
 	int get_n_threads() const;
 	void set_n_threads(int n_threads=-1);
