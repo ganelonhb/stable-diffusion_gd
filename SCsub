@@ -3,9 +3,12 @@ Import('env')
 env_sd = env.Clone()
 env_sd.add_source_files(env.modules_sources, "*.cpp")
 
-env_sd.Append(CPPPATH=["ggml/src/", "ggml/include/", "ggml/ggml/src/", "ggml/ggml/include/", "stable-diffusion/", "stable-diffusion/thirdparty"])
-env_sd.Append(LIBPATH=["libs"])
+env_sd.Append(CPPPATH=["stable-diffusion_cpp/", "stable-diffusion_cpp/thirdparty", "stable-diffusion_cpp/ggml/include", "stable-diffusion_cpp/ggml/ggml/include", "stable-diffusion_cpp/ggml/ggml/src", "stable-diffusion_cpp/ggml/src",])
 
-env_sd.Append(LIBS=["ggml", "stable-diffusion"])
+env_sd.Append(CCFLAGS=['-fexceptions'])
 
-env_sd.Append(CCFLAGS=["-O2"])
+
+
+env.Append(LIBPATH=["libs"])
+
+env.Append(LIBS=[env.File("libs/libstable-diffusion.a"), env.File("libs/libggml.a"), env.File("/usr/lib/libgomp.so"), env.File("/usr/lib/libpthread.a"), "m"])

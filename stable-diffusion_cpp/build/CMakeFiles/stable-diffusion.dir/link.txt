@@ -1,0 +1,2 @@
+/usr/bin/ar qc libstable-diffusion.a "CMakeFiles/stable-diffusion.dir/model.cpp.o" "CMakeFiles/stable-diffusion.dir/stable-diffusion.cpp.o" "CMakeFiles/stable-diffusion.dir/upscaler.cpp.o" "CMakeFiles/stable-diffusion.dir/util.cpp.o" thirdparty/CMakeFiles/zip.dir/zip.c.o
+/usr/bin/ranlib libstable-diffusion.a

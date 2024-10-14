@@ -1,6 +1,9 @@
 # Godot 4+ specific ignores
 .godot/
 
+TODO
+err.txt
+
 # Godot-specific ignores
 .import/
 export.cfg

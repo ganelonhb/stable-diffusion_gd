@@ -1,0 +1,68 @@
+[
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build",
+  "command": "/usr/bin/c++ -DGGML_MAX_NAME=128 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/. -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/../include -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty/. -O3 -DNDEBUG -o CMakeFiles/stable-diffusion.dir/model.cpp.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/model.cpp",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/model.cpp",
+  "output": "CMakeFiles/stable-diffusion.dir/model.cpp.o"
+},
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build",
+  "command": "/usr/bin/c++ -DGGML_MAX_NAME=128 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/. -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/../include -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty/. -O3 -DNDEBUG -o CMakeFiles/stable-diffusion.dir/stable-diffusion.cpp.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/stable-diffusion.cpp",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/stable-diffusion.cpp",
+  "output": "CMakeFiles/stable-diffusion.dir/stable-diffusion.cpp.o"
+},
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build",
+  "command": "/usr/bin/c++ -DGGML_MAX_NAME=128 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/. -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/../include -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty/. -O3 -DNDEBUG -o CMakeFiles/stable-diffusion.dir/upscaler.cpp.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/upscaler.cpp",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/upscaler.cpp",
+  "output": "CMakeFiles/stable-diffusion.dir/upscaler.cpp.o"
+},
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build",
+  "command": "/usr/bin/c++ -DGGML_MAX_NAME=128 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/. -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/../include -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty/. -O3 -DNDEBUG -o CMakeFiles/stable-diffusion.dir/util.cpp.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/util.cpp",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/util.cpp",
+  "output": "CMakeFiles/stable-diffusion.dir/util.cpp.o"
+},
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build/ggml/src",
+  "command": "/usr/bin/cc -DGGML_MAX_NAME=128 -DGGML_SCHED_MAX_COPIES=4 -DGGML_USE_OPENMP -D_GNU_SOURCE -D_XOPEN_SOURCE=600 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/../include -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/. -O3 -DNDEBUG -std=gnu11 -Wshadow -Wstrict-prototypes -Wpointer-arith -Wmissing-prototypes -Werror=implicit-int -Werror=implicit-function-declaration -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wdouble-promotion -march=native -fopenmp -o CMakeFiles/ggml.dir/ggml.c.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/ggml.c",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/ggml.c",
+  "output": "ggml/src/CMakeFiles/ggml.dir/ggml.c.o"
+},
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build/ggml/src",
+  "command": "/usr/bin/cc -DGGML_MAX_NAME=128 -DGGML_SCHED_MAX_COPIES=4 -DGGML_USE_OPENMP -D_GNU_SOURCE -D_XOPEN_SOURCE=600 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/../include -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/. -O3 -DNDEBUG -std=gnu11 -Wshadow -Wstrict-prototypes -Wpointer-arith -Wmissing-prototypes -Werror=implicit-int -Werror=implicit-function-declaration -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wdouble-promotion -march=native -fopenmp -o CMakeFiles/ggml.dir/ggml-alloc.c.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/ggml-alloc.c",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/ggml-alloc.c",
+  "output": "ggml/src/CMakeFiles/ggml.dir/ggml-alloc.c.o"
+},
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build/ggml/src",
+  "command": "/usr/bin/cc -DGGML_MAX_NAME=128 -DGGML_SCHED_MAX_COPIES=4 -DGGML_USE_OPENMP -D_GNU_SOURCE -D_XOPEN_SOURCE=600 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/../include -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/. -O3 -DNDEBUG -std=gnu11 -Wshadow -Wstrict-prototypes -Wpointer-arith -Wmissing-prototypes -Werror=implicit-int -Werror=implicit-function-declaration -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wdouble-promotion -march=native -fopenmp -o CMakeFiles/ggml.dir/ggml-backend.c.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/ggml-backend.c",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/ggml-backend.c",
+  "output": "ggml/src/CMakeFiles/ggml.dir/ggml-backend.c.o"
+},
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build/ggml/src",
+  "command": "/usr/bin/cc -DGGML_MAX_NAME=128 -DGGML_SCHED_MAX_COPIES=4 -DGGML_USE_OPENMP -D_GNU_SOURCE -D_XOPEN_SOURCE=600 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/../include -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/. -O3 -DNDEBUG -std=gnu11 -Wshadow -Wstrict-prototypes -Wpointer-arith -Wmissing-prototypes -Werror=implicit-int -Werror=implicit-function-declaration -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wdouble-promotion -march=native -fopenmp -o CMakeFiles/ggml.dir/ggml-quants.c.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/ggml-quants.c",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/ggml-quants.c",
+  "output": "ggml/src/CMakeFiles/ggml.dir/ggml-quants.c.o"
+},
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build/ggml/src",
+  "command": "/usr/bin/cc -DGGML_MAX_NAME=128 -DGGML_SCHED_MAX_COPIES=4 -DGGML_USE_OPENMP -D_GNU_SOURCE -D_XOPEN_SOURCE=600 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/../include -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/. -O3 -DNDEBUG -std=gnu11 -Wshadow -Wstrict-prototypes -Wpointer-arith -Wmissing-prototypes -Werror=implicit-int -Werror=implicit-function-declaration -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wdouble-promotion -march=native -fopenmp -o CMakeFiles/ggml.dir/ggml-aarch64.c.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/ggml-aarch64.c",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/ggml-aarch64.c",
+  "output": "ggml/src/CMakeFiles/ggml.dir/ggml-aarch64.c.o"
+},
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build/thirdparty",
+  "command": "/usr/bin/cc -DGGML_MAX_NAME=128 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty/. -O3 -DNDEBUG -o CMakeFiles/zip.dir/zip.c.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty/zip.c",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty/zip.c",
+  "output": "thirdparty/CMakeFiles/zip.dir/zip.c.o"
+},
+{
+  "directory": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/build/examples/cli",
+  "command": "/usr/bin/c++ -DGGML_MAX_NAME=128 -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/examples -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/. -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/ggml/src/../include -I/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/thirdparty/. -O3 -DNDEBUG -o CMakeFiles/sd.dir/main.cpp.o -c /home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/examples/cli/main.cpp",
+  "file": "/home/donquixote/git/godot/modules/stable_diffusion_gd/stable-diffusion_cpp/examples/cli/main.cpp",
+  "output": "examples/cli/CMakeFiles/sd.dir/main.cpp.o"
+}
+]
