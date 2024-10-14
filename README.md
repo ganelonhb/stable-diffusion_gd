@@ -1,29 +1,41 @@
 # stable-diffusion.gd
 A C++ module for Godot to interact with Stable-Diffusion.cpp.
 
+## Todo
+
+☐ URGENT A thread for the execution of both context loading and image generation
+☐ URGENT Actual Windows and Mac build support...
+☐ Support for img2img
+☐ Support for loading model from user::/
+☐ Improved API access to stable-diffusion.cpp for custom txt2img implementation
+☐ Custom GGML backend for loading from buffer
+☐ Suport for loading model from res::/
+
+☐ Volk support...?
+
 ## Building
 
 To get up-and-running, you will want to clone the code onto your machine, then follow these steps.
 
 1. cd into the stable_diffusion_gd directory.
-2. Compile stable diffusion with a backend of your choice (See [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp))
+2. Compile stable diffusion with a backend of your choice (See [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp)) (as of now, vulkan support is borked thanks to Godot's use of Volk).
 3. Find both libstable-diffusion and libggml, and drop them into the proper directory in libs/
 4. Copy the directory into your local copy of godot/modules/
 5. Build Godot using Scons like you would any other module!
 
 ## Usage
 
-stable-diffusion.gd offers robust interaction with Stable-Diffusion.cpp. Simply add the "StableDiffusion" node to a scene to make use of it.
+stable-diffusion.gd offers robust interaction with Stable-Diffusion.cpp. Simply add the "StableDiffusion" node to a scene to make use of it. The next sections will be dedicated to teaching you how to use the node.
 
 ### The StableDiffusion Node -- Properties
 
-The following properties can be used in GDScript, or set in the editor. The following section will explain the usage of each one.
+The following properties can be used in GDScript using getters and setters that follow the get_property_name_here and set_property_name_here format, or set in the editor. The following section will explain the usage of each one.
 
 **Prompt.** The prompt property sets the prompt to use with inference.
 
 **Negative Prompt.** The negative prompt property specifies tokens to penalize, making it less likely that certain concepts will appear in the generation.
 
-**Model Path.** The model path declares a path to seek the model in. Currently, it does *not* support Resources, nor the user:// notation. Unless GGML is updated to support loading models from a buffer, resources may never be supported, but soon the codebase will be reorganized to be smarter and interact better with Godot.
+**Model Path.** The model path declares a path to seek the model in. Currently, it does *not* support Resources, nor the user:// notation. Unless GGML is updated to support loading models from a buffer, resources may not be supported for a while, but soon the codebase will be reorganized to be smarter and interact better with Godot.
 
 **Width and Height.** The Width and Height properties set the width and height in pixels of the generated image.
 

@@ -39,6 +39,8 @@ const char* modes_str[] = {
 
 StableDiffusion::StableDiffusion()
 	: preloaded(false)
+	, loading_ctx(false)
+	, generating(false)
 {
 
 }
@@ -760,4 +762,7 @@ void StableDiffusion::_bind_methods() {
 	// rng_type_t enum
 	BIND_CONSTANT(STD_DEFAULT_RNG);
 	BIND_CONSTANT(CUDA_RNG);
+
+	ADD_SIGNAL(MethodInfo("ctx_preloaded"));
+	ADD_SIGNAL(MethodInfo("generation_complete"));
 }

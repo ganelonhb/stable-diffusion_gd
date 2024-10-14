@@ -11,6 +11,9 @@
 #include "core/io/image.h"
 #include "core/templates/vector.h"
 #include "scene/resources/image_texture.h"
+#include "core/os/thread.h"
+#include "core/os/mutex.h"
+#include "core/os/semaphore.h"
 
 // C/C++ Includes
 #include <string.h>
@@ -130,6 +133,7 @@ public:
 	// Functionality
 
 	bool preload_ctx();
+	void threaded_preload_ctx();
 	void free_ctx();
 
 	bool txt2img(
@@ -137,6 +141,12 @@ public:
 			String negative_prompt = String(),
 			Ref<ImageTexture> control_image = Ref<ImageTexture>()
 	); // meow
+
+	void threaded_txt2img(
+		String prompt = String(),
+		String negative_prompt = String(),
+		Ref<ImageTexture> control_image = Ref<ImageTexture>()
+	);
 
 	Ref<ImageTexture> get_result(int result = 0) const;
 
@@ -235,7 +245,22 @@ public:
 	void set_negative_prompt(String negative_prompt);
 
 private:
+	Thread thread;
+	Mutex mutex;
+	Semaphore semaphore;
+
 	static const int USE_MODEL_WEIGHTS{static_cast<int>(SD_TYPE_COUNT)};
+
+	static void _threaded_ctx_callback(void *user_data);
+	static void _threaded_img2img_callback(
+		void *user_data,
+		String prompt = String(),
+		String negative_prompt = String(),
+		Ref<ImageTexture> control_image = Ref<ImageTexture>()
+	);
+
+	bool loading_ctx;
+	bool generating;
 
 	bool preloaded;
 
