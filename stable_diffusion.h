@@ -25,9 +25,11 @@
 #include <sstream>
 #include <limits>
 #include <cstdint>
+#include <unordered_map>
 
 // Stable Diffusion Includes
 // #include "preprocessing.hpp"
+
 #include "flux.hpp"
 #include "stable-diffusion.h"
 
@@ -133,22 +135,17 @@ public:
 	// Functionality
 
 	bool preload_ctx();
-	void threaded_preload_ctx();
+	// void threaded_preload_ctx();
 	void free_ctx();
 
-	bool txt2img(
-			String prompt = String(),
-			String negative_prompt = String(),
-			Ref<ImageTexture> control_image = Ref<ImageTexture>()
-	); // meow
-
-	void threaded_txt2img(
+	void txt2img(
 		String prompt = String(),
 		String negative_prompt = String(),
-		Ref<ImageTexture> control_image = Ref<ImageTexture>()
-	);
+		Ref<Image> control_image = Ref<Image>()
+	); // meow
 
 	Ref<ImageTexture> get_result(int result = 0) const;
+	Ref<ImageTexture> get_last_result() const;
 
 	int get_num_cpus() const;
 
@@ -249,18 +246,14 @@ private:
 	Mutex mutex;
 	Semaphore semaphore;
 
+	String prompt;
+	String negative_prompt;
+	Ref<Image> control_image;
+
+	static void _txt2img_callback(void *p_user);
+	void _on_txt2img_complete();
+
 	static const int USE_MODEL_WEIGHTS{static_cast<int>(SD_TYPE_COUNT)};
-
-	static void _threaded_ctx_callback(void *user_data);
-	static void _threaded_img2img_callback(
-		void *user_data,
-		String prompt = String(),
-		String negative_prompt = String(),
-		Ref<ImageTexture> control_image = Ref<ImageTexture>()
-	);
-
-	bool loading_ctx;
-	bool generating;
 
 	bool preloaded;
 

@@ -7,8 +7,6 @@ env_sd.Append(CPPPATH=["stable-diffusion_cpp/", "stable-diffusion_cpp/thirdparty
 
 env_sd.Append(CCFLAGS=['-fexceptions'])
 
-
-
 env.Append(LIBPATH=["libs"])
 
-env.Append(LIBS=[env.File("libs/libstable-diffusion.a"), env.File("libs/libggml.a"), env.File("/usr/lib/libgomp.so"), env.File("/usr/lib/libpthread.a"), "m"])
+env.Append(LIBS=[env.File("libs/libstable-diffusion.a"), env.File("libs/libggml.a"), env.File("/usr/lib/libgomp.so"), env.File("/usr/lib/libpthread.a")])

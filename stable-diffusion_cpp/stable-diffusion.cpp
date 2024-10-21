@@ -767,6 +767,7 @@ public:
         size_t steps = sigmas.size() - 1;
         // noise = load_tensor_from_file(work_ctx, "./rand0.bin");
         // print_ggml_tensor(noise);
+
         struct ggml_tensor* x = ggml_dup_tensor(work_ctx, init_latent);
         copy_ggml_tensor(x, init_latent);
         x = denoiser->noise_scaling(sigmas[0], noise, x);
@@ -782,7 +783,6 @@ public:
             out_uncond = ggml_dup_tensor(work_ctx, x);
         }
         struct ggml_tensor* denoised = ggml_dup_tensor(work_ctx, x);
-
         auto denoise = [&](ggml_tensor* input, float sigma, int step) -> ggml_tensor* {
             if (step == 1) {
                 pretty_progress(0, (int)steps, 0);
@@ -1685,4 +1685,179 @@ SD_API sd_image_t* img2vid(sd_ctx_t* sd_ctx,
     LOG_INFO("img2vid completed in %.2fs", (t3 - t0) * 1.0f / 1000);
 
     return result_images;
+}
+
+
+// The following methods are intended to interact with sd_ctx in a more modular way
+// for use in Godot
+SD_API void SD_API_set_mem_size(
+	struct ggml_init_params *params,
+	sd_ctx_t *ctx,
+	int width,
+	int height,
+	int batch_count,
+	void *mem_buffer,
+	bool no_alloc
+) {
+	params->mem_size = static_cast<size_t>(0xA00000); // 10 MB
+
+	if (ctx->sd->version == VERSION_SD3_2B) {
+		params->mem_size *= 3;
+	}
+	else if (ctx->sd->version == VERSION_FLUX_DEV || ctx->sd->version == VERSION_FLUX_SCHNELL) {
+        params->mem_size *= 4;
+    }
+
+    if (ctx->sd->stacked_id) {
+        params->mem_size += static_cast<size_t>(0xA00000);  // 10 MB
+    }
+
+    params->mem_size += width * height * 3 * sizeof(float);
+	params->mem_size *= batch_count;
+	params->mem_buffer = mem_buffer;
+	params->no_alloc = no_alloc;
+}
+
+SD_API std::vector<float> SD_API_get_sigmas(sd_ctx_t *ctx, int sample_steps) {
+	return ctx->sd->denoiser->get_sigmas(sample_steps);
+}
+
+SD_API int SD_API_get_C(sd_ctx_t *ctx) {
+	return (   ctx->sd->version == VERSION_SD3_2B
+			|| ctx->sd->version == VERSION_FLUX_DEV
+			|| ctx->sd->version == VERSION_FLUX_SCHNELL
+		) ? 16 : 4;
+}
+
+SD_API void SD_API_ggml_init_latent(sd_ctx_t *ctx, ggml_context* work_ctx, ggml_tensor **init_latent, int width, int height) {
+	*init_latent = ggml_new_tensor_4d(
+		work_ctx,
+		GGML_TYPE_F32,
+		static_cast<int>(width / 8),
+		static_cast<int>(height / 8),
+		SD_API_get_C(ctx),
+		1
+	);
+
+	float f32 = 0.f;
+
+	if (ctx->sd->version == VERSION_SD3_2B)
+		f32 = 0.0609f;
+	else if (ctx->sd->version == VERSION_FLUX_DEV || ctx->sd->version == VERSION_FLUX_SCHNELL)
+		f32 = 0.1159f;
+
+	ggml_set_f32(*init_latent, f32);
+}
+
+SD_API int64_t SD_API_apply_lora(sd_ctx_t *ctx, std::unordered_map<std::string, float> *lora_f2m) {
+	int64_t start = ggml_time_ms();
+	ctx->sd->apply_loras(*lora_f2m);
+	return ggml_time_ms() - start;
+}
+
+SD_API SDCondition SD_API_get_learned_condition(sd_ctx_t *ctx, ggml_context *work_ctx, std::string prompt, int clip_skip, int width, int height) {
+
+	return ctx->sd->cond_stage_model->get_learned_condition(
+		work_ctx,
+		ctx->sd->n_threads,
+		prompt,
+		clip_skip,
+		width,
+		height,
+		ctx->sd->diffusion_model->get_adm_in_channels()
+	);
+}
+
+SD_API SDCondition SD_API_get_learned_uncondition(sd_ctx_t *ctx, ggml_context *work_ctx, std::string negative_prompt, int clip_skip, int width, int height) {
+	bool force_zero_embeddings = (ctx->sd->version == VERSION_SDXL && negative_prompt.size() == 0);
+
+	return ctx->sd->cond_stage_model->get_learned_condition(
+		work_ctx,
+		ctx->sd->n_threads,
+		negative_prompt,
+		clip_skip,
+		width,
+		height,
+		ctx->sd->diffusion_model->get_adm_in_channels(),
+		force_zero_embeddings
+	);
+}
+
+SD_API bool SD_API_free_params_immediately_cond_stage(sd_ctx_t *ctx) {
+	bool free_params_immediately = ctx->sd->free_params_immediately;
+
+	if (free_params_immediately && ctx->sd->cond_stage_model)
+		ctx->sd->cond_stage_model->free_params_buffer();
+
+	return free_params_immediately;
+}
+
+SD_API bool SD_API_free_params_immediately_diffusion(sd_ctx_t *ctx) {
+	bool free_params_immediately = ctx->sd->free_params_immediately;
+
+	if (free_params_immediately && ctx->sd->diffusion_model)
+		ctx->sd->diffusion_model->free_params_buffer();
+
+	return free_params_immediately;
+}
+
+SD_API bool SD_API_free_params_immediately_first_stage(sd_ctx_t *ctx) {
+	bool free_params_immediately = ctx->sd->free_params_immediately;
+
+	if (free_params_immediately && ctx->sd->first_stage_model)
+		ctx->sd->first_stage_model->free_params_buffer();
+
+	return free_params_immediately;
+}
+
+SD_API void SD_API_manual_seed(sd_ctx_t *ctx, int64_t current_seed) {
+	ctx->sd->rng->manual_seed(current_seed);
+}
+
+SD_API void SD_API_ggml_tensor_set_f32_randn(ggml_tensor *noise, sd_ctx_t *ctx) {
+	ggml_tensor_set_f32_randn(noise, ctx->sd->rng);
+}
+
+SD_API ggml_tensor *SD_API_sample(
+	sd_ctx_t *ctx,
+	ggml_context *work_ctx,
+	ggml_tensor *x_t,
+	ggml_tensor *noise,
+	SDCondition cond,
+	SDCondition uncond,
+	ggml_tensor *image_hint,
+	float control_strength,
+	float cfg_scale,
+	float guidance,
+	enum sample_method_t sample_method,
+	const std::vector<float> &sigmas
+) {
+	return ctx->sd->sample(
+		work_ctx,
+		x_t,
+		noise,
+		cond,
+		uncond,
+		image_hint,
+		control_strength,
+		cfg_scale,
+		cfg_scale,
+		guidance,
+		sample_method,
+		sigmas,
+		-1,
+		SDCondition()
+	);
+}
+
+SD_API ggml_tensor *SD_API_decode_first_stage(ggml_context *work_ctx, sd_ctx_t *ctx, ggml_tensor *final_latents_step) {
+	return ctx->sd->decode_first_stage(work_ctx, final_latents_step);
+}
+
+SD_API uint8_t *SD_API_sd_tensor_to_image(ggml_tensor *input) {
+	return sd_tensor_to_image(input);
+}
+
+SD_API size_t SD_API_sizeof_sd_image() {
+	return sizeof(sd_image_t);
 }

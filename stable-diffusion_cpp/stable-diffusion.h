@@ -1,6 +1,8 @@
 #ifndef __STABLE_DIFFUSION_H__
 #define __STABLE_DIFFUSION_H__
 
+#include <unordered_map>
+
 #if defined(_WIN32) || defined(__CYGWIN__)
 #ifndef SD_BUILD_SHARED_LIB
 #define SD_API
@@ -219,8 +221,76 @@ SD_API uint8_t* preprocess_canny(uint8_t* img,
                                  float strong,
                                  bool inverse);
 
+
 #ifdef __cplusplus
 }
+
+// The following methods are intended to interact with sd_ctx in a more modular way
+// for use in Godot
+
+struct SDCondition;
+struct ggml_tensor;
+struct ggml_context;
+
+SD_API void SD_API_set_mem_size(
+	struct ggml_init_params *params,
+	sd_ctx_t *ctx,
+	int width = 512,
+	int height = 512,
+	int batch_count = 1,
+	void *mem_buffer = NULL,
+	bool no_alloc = false);
+
+SD_API std::vector<float> SD_API_get_sigmas(sd_ctx_t *ctx, int sample_steps = 20);
+
+SD_API int SD_API_get_C(sd_ctx_t *ctx);
+
+SD_API void SD_API_ggml_init_latent(sd_ctx_t *ctx, ggml_context *work_ctx, ggml_tensor **init_latent, int width, int height);
+
+
+// generate image API
+
+// Returns elapsed time in milliseconds.
+SD_API int64_t SD_API_apply_lora(sd_ctx_t * ctx, std::unordered_map<std::string, float> *lora_f2m);
+
+SD_API SDCondition SD_API_get_learned_condition(sd_ctx_t *ctx, ggml_context *work_ctx, std::string prompt, int clip_skip, int width, int height);
+
+SD_API SDCondition SD_API_get_learned_uncondition(sd_ctx_t *ctx, ggml_context *work_ctx, std::string negative_prompt, int clip_skip, int width, int height);
+
+SD_API bool SD_API_free_params_immediately_cond_stage(sd_ctx_t *ctx);
+SD_API bool SD_API_free_params_immediately_diffusion(sd_ctx_t *ctx);
+SD_API bool SD_API_free_params_immediately_first_stage(sd_ctx_t *ctx);
+
+SD_API void SD_API_manual_seed(sd_ctx_t *ctx, int64_t current_seed);
+
+SD_API void SD_API_ggml_tensor_set_f32_randn(ggml_tensor *noise, sd_ctx_t *ctx);
+
+
+SD_API ggml_tensor *SD_API_sample(
+	sd_ctx_t *ctx,
+	ggml_context *work_ctx,
+	ggml_tensor *x_t,
+	ggml_tensor *noise,
+	SDCondition cond,
+	SDCondition uncond,
+	ggml_tensor *image_hint,
+	float control_strength,
+	float cfg_scale,
+	float guidance,
+	enum sample_method_t sample_method,
+	const std::vector<float> &sigmas
+);
+
+SD_API ggml_tensor *SD_API_decode_first_stage(
+	ggml_context *work_ctx,
+	sd_ctx_t *ctx,
+	ggml_tensor *final_latents_step
+);
+
+SD_API uint8_t *SD_API_sd_tensor_to_image(ggml_tensor *input);
+
+SD_API size_t SD_API_sizeof_sd_image();
+
 #endif
 
 #endif  // __STABLE_DIFFUSION_H__

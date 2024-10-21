@@ -1,6 +1,21 @@
 #include "stable_diffusion.h"
 
-#include <iostream>
+#include "ggml_extend.hpp"
+
+#include "model.h"
+#include "rng.hpp"
+#include "rng_philox.hpp"
+
+#include "util.h"
+
+#include "conditioner.hpp"
+#include "control.hpp"
+#include "diffusion_model.hpp"
+#include "esrgan.hpp"
+#include "lora.hpp"
+#include "pmid.hpp"
+#include "tae.hpp"
+#include "vae.hpp"
 
 const char *rng_type_to_str[] = {
 	"std_default",
@@ -39,13 +54,14 @@ const char* modes_str[] = {
 
 StableDiffusion::StableDiffusion()
 	: preloaded(false)
-	, loading_ctx(false)
-	, generating(false)
 {
 
 }
 
 StableDiffusion::~StableDiffusion() {
+	if (thread.is_started())
+		thread.wait_to_finish();
+
 	if (m_sd_ctx)
 		free_sd_ctx(m_sd_ctx);
 }
@@ -83,40 +99,53 @@ bool StableDiffusion::preload_ctx() {
 	return preloaded;
 }
 
-bool StableDiffusion::txt2img(
+void StableDiffusion::txt2img(
 	String prompt,
 	String negative_prompt,
-	Ref<ImageTexture> control_image
-) {
+	Ref<Image> control_image
+	) {
+	if (thread.is_started())
+		thread.wait_to_finish();
 
+	this->prompt = prompt;
+	this->negative_prompt = negative_prompt;
+	this->control_image = control_image;
+
+	thread.start(_txt2img_callback, this);
+}
+
+void StableDiffusion::_txt2img_callback(
+	void *p_user
+) {
+	StableDiffusion *self = static_cast<StableDiffusion *>(p_user);
 	// load ctx
-	if (!preloaded) {
-		m_sd_ctx = new_sd_ctx(
-			m_params.model_path.c_str(),
-			m_params.clip_l_path.c_str(),
+	if (!self->preloaded) {
+		self->m_sd_ctx = new_sd_ctx(
+			self->m_params.model_path.c_str(),
+			self->m_params.clip_l_path.c_str(),
 			"",
-			m_params.diffusion_model_path.c_str(),
-			m_params.vae_path.c_str(),
-			m_params.taesd_path.c_str(),
-			m_params.controlnet_path.c_str(),
-			m_params.lora_model_dir.c_str(),
+			self->m_params.diffusion_model_path.c_str(),
+			self->m_params.vae_path.c_str(),
+			self->m_params.taesd_path.c_str(),
+			self->m_params.controlnet_path.c_str(),
+			self->m_params.lora_model_dir.c_str(),
 			"",
 			"",
 			false,
-			m_params.vae_tiling,
+			self->m_params.vae_tiling,
 			true,
-			m_params.n_threads,
-			m_params.wtype,
-			m_params.rng_type,
-			m_params.schedule,
-			m_params.clip_on_cpu,
-			m_params.control_net_cpu,
-			m_params.vae_on_cpu,
-			m_params.diffusion_flash_attn
+			self->m_params.n_threads,
+			self->m_params.wtype,
+			self->m_params.rng_type,
+			self->m_params.schedule,
+			self->m_params.clip_on_cpu,
+			self->m_params.control_net_cpu,
+			self->m_params.vae_on_cpu,
+			self->m_params.diffusion_flash_attn
 		);
 	}
 
-	if (!m_sd_ctx) return false;
+	if (!self->m_sd_ctx) return;
 
 	// txt2img
 	uint8_t *control_image_buffer = NULL;
@@ -124,13 +153,11 @@ bool StableDiffusion::txt2img(
 
 	sd_image_t *results = NULL;
 
-	Ref<Image> img = control_image != Ref<ImageTexture>() ? control_image->get_image() : Ref<Image>();
-
-	if (m_params.controlnet_path.size() > 0 && !img.is_null()) {
-		int width = img->get_width();
-		int height = img->get_height();
-		int channels = img->get_format() == Image::FORMAT_RGBA8 ? 4 : 3;
-		const uint8_t *raw_data = img->get_data().ptr();
+	if (self->m_params.controlnet_path.size() > 0 && !self->control_image.is_null()) {
+		int width = self->control_image->get_width();
+		int height = self->control_image->get_height();
+		int channels = self->control_image->get_format() == Image::FORMAT_RGBA8 ? 4 : 3;
+		const uint8_t *raw_data = self->control_image->get_data().ptr();
 
 		int desired_channels = 0;
 		control_image_buffer = stbi_load_from_memory(raw_data, width * height * channels, &width, &height, &desired_channels, desired_channels);
@@ -139,39 +166,169 @@ bool StableDiffusion::txt2img(
 			print_line("-- Using a Controlnet --");
 
 		sd_control_image = new sd_image_t{
-			(uint32_t)m_params.width,
-			(uint32_t)m_params.height,
+			(uint32_t)self->m_params.width,
+			(uint32_t)self->m_params.height,
 			3,
 			control_image_buffer};
 	}
 
-	std::string std_prompt = prompt != String() ? std::string(prompt.utf8()) : m_params.prompt;
-	std::string std_nprompt = negative_prompt != String() ? std::string(negative_prompt.utf8()) : m_params.negative_prompt;
+	std::string std_prompt = self->prompt != String() ? std::string(self->prompt.utf8()) : self->m_params.prompt;
+	std::string std_nprompt = self->negative_prompt != String() ? std::string(self->negative_prompt.utf8()) : self->m_params.negative_prompt;
 
-	results = ::txt2img(
-		m_sd_ctx,
-		std_prompt.c_str(),
-		std_nprompt.c_str(),
-		m_params.clip_skip,
-		m_params.cfg_scale,
-		m_params.guidance,
-		m_params.width,
-		m_params.height,
-		m_params.sample_method,
-		m_params.sample_steps,
-		m_params.seed,
-		m_params.batch_count,
-		sd_control_image,
-		m_params.control_strength,
-		m_params.style_ratio,
-		false,
-		""
+	struct ggml_init_params params;
+	SD_API_set_mem_size(
+		&params,
+		self->m_sd_ctx,
+		self->m_params.width,
+		self->m_params.height,
+		self->m_params.batch_count
 	);
 
+	struct ggml_context *work_ctx = ggml_init(params);
+	if (!work_ctx) {
+		if (!self->preloaded) {
+			free_sd_ctx(self->m_sd_ctx);
+			self->m_sd_ctx = nullptr;
+		}
+		if (sd_control_image) delete sd_control_image;
+		if (control_image_buffer) free(control_image_buffer);
+		return;
+	}
 
-	if (!results) return false;
+	size_t start_init = ggml_time_ms();
 
-	for (int i = 0; i < m_params.batch_count; ++i)
+	std::vector<float> sigmas = SD_API_get_sigmas(self->m_sd_ctx, self->m_params.sample_steps);
+
+	ggml_tensor *init_latent = NULL;
+
+	SD_API_ggml_init_latent(self->m_sd_ctx, work_ctx, &init_latent, self->m_params.width, self->m_params.height);
+
+	size_t end_init = ggml_time_ms() - start_init;
+
+	int64_t seed = self->m_params.seed;
+
+	if (seed < 0) {
+		srand((int)time(NULL));
+		seed = rand();
+	}
+
+	int sample_steps = sigmas.size() - 1;
+
+	auto result_pair = extract_and_remove_lora(std_prompt);
+	std::unordered_map<std::string, float> lora_f2m = result_pair.first;
+
+	std_prompt = result_pair.second;
+
+	size_t start_lora = ggml_time_ms();
+	SD_API_apply_lora(self->m_sd_ctx, &lora_f2m);
+	size_t end_lora = ggml_time_ms() - start_lora;
+
+	ggml_tensor *init_img = NULL;
+
+	size_t start_cond = ggml_time_ms();
+	SDCondition cond = SD_API_get_learned_condition(self->m_sd_ctx, work_ctx, std_prompt, self->m_params.clip_skip, self->m_params.width, self->m_params.height);
+
+	SDCondition uncond;
+
+	if (self->m_params.cfg_scale != 1.0)
+		uncond = SD_API_get_learned_uncondition(self->m_sd_ctx, work_ctx, std_nprompt, self->m_params.clip_skip, self->m_params.width, self->m_params.height);
+
+	size_t end_cond = ggml_time_ms() - start_cond;
+
+	SD_API_free_params_immediately_cond_stage(self->m_sd_ctx);
+
+	// Control net hint
+	ggml_tensor * image_hint = NULL;
+
+	if (sd_control_image) {
+		image_hint = ggml_new_tensor_4d(work_ctx, GGML_TYPE_F32, self->m_params.width, self->m_params.height, 3, 1);
+		sd_image_to_tensor(sd_control_image->data, image_hint);
+	}
+
+	int C = SD_API_get_C(self->m_sd_ctx);
+	int W = self->m_params.width / 8;
+	int H = self->m_params.height / 8;
+
+	std::vector<ggml_tensor *> final_latents;
+
+	int64_t sample_start = ggml_time_ms();
+	for (int b = 0; b < self->m_params.batch_count; ++b) {
+		int64_t iter_start = ggml_time_ms();
+
+		int64_t cur_seed = seed + b;
+
+		SD_API_manual_seed(self->m_sd_ctx, cur_seed);
+
+		ggml_tensor *x_t = init_latent;
+		ggml_tensor *noise = ggml_new_tensor_4d(work_ctx, GGML_TYPE_F32, W, H, C, 1);
+		SD_API_ggml_tensor_set_f32_randn(noise, self->m_sd_ctx);
+
+		ggml_tensor * x_0 = SD_API_sample(
+			self->m_sd_ctx,
+			work_ctx,
+			x_t,
+			noise,
+			cond,
+			uncond,
+			image_hint,
+			self->m_params.control_strength,
+			self->m_params.cfg_scale,
+			self->m_params.guidance,
+			self->m_params.sample_method,
+			sigmas
+		);
+
+		final_latents.push_back(x_0);
+		int64_t iter_end = ggml_time_ms() - iter_start;
+	}
+	int64_t sample_end = ggml_time_ms() - sample_start;
+
+	SD_API_free_params_immediately_diffusion(self->m_sd_ctx);
+
+	std::vector<ggml_tensor *> decoded_images;
+
+	size_t start_decoding_all = ggml_time_ms();
+	for (size_t i = 0; i < final_latents.size(); ++i) {
+		size_t start_decode = ggml_time_ms();
+
+		ggml_tensor *img = SD_API_decode_first_stage(
+			work_ctx,
+			self->m_sd_ctx,
+			final_latents[i]
+		);
+
+		if (img)
+			decoded_images.push_back(img);
+
+		size_t end_decode = ggml_time_ms() - start_decode;
+	}
+	size_t end_decoding_all = ggml_time_ms() - start_decoding_all;
+
+	SD_API_free_params_immediately_first_stage(self->m_sd_ctx);
+
+	results = (sd_image_t *)calloc(self->m_params.batch_count, SD_API_sizeof_sd_image());
+
+	if (!results) {
+		if (!self->preloaded) {
+			free_sd_ctx(self->m_sd_ctx);
+			self->m_sd_ctx = nullptr;
+		}
+		if (sd_control_image) delete sd_control_image;
+		if (control_image_buffer) free(control_image_buffer);
+		ggml_free(work_ctx);
+		return;
+	}
+
+	for (size_t i = 0; i < decoded_images.size(); ++i) {
+		results[i].width = self->m_params.width;
+		results[i].height = self->m_params.height;
+		results[i].channel = 3;
+		results[i].data = SD_API_sd_tensor_to_image(decoded_images[i]);
+	}
+
+	ggml_free(work_ctx);
+
+	for (int i = 0; i < self->m_params.batch_count; ++i)
 	{
 		if (!results[i].data) continue;
 
@@ -195,7 +352,7 @@ bool StableDiffusion::txt2img(
 
 		Ref<ImageTexture> texture = ImageTexture::create_from_image(image);
 
-		m_results.append(texture);
+		self->m_results.append(texture);
 
 		free(results[i].data);
 	}
@@ -203,20 +360,29 @@ bool StableDiffusion::txt2img(
 	free(results);
 
 	// free ctx
-	if (!preloaded) {
-		free_sd_ctx(m_sd_ctx);
-		m_sd_ctx = nullptr;
+	if (!self->preloaded) {
+		free_sd_ctx(self->m_sd_ctx);
+		self->m_sd_ctx = nullptr;
 	}
 
 	if (sd_control_image) delete sd_control_image;
 	if (control_image_buffer) free(control_image_buffer);
-	return true;
+
+	self->call_deferred("_on_txt2img_complete");
 }
 
 Ref<ImageTexture> StableDiffusion::get_result(int result) const {
 	if (!m_results.size()) return Ref<ImageTexture>();
 
 	return m_results[result];
+}
+
+Ref<ImageTexture> StableDiffusion::get_last_result() const {
+	auto size = m_results.size();
+
+	if (!size) return Ref<ImageTexture>();
+
+	return m_results[size - 1];
 }
 
 int StableDiffusion::get_num_cpus() const {
@@ -465,6 +631,10 @@ void StableDiffusion::set_negative_prompt(String negative_prompt) {
 	m_params.negative_prompt = negative_prompt.utf8();
 }
 
+void StableDiffusion::_on_txt2img_complete() {
+	emit_signal("txt2img_complete");
+}
+
 void StableDiffusion::test_sd(const String str) {
 	print_line("Started initializing SD context...");
 	m_sd_ctx = new_sd_ctx(
@@ -564,7 +734,10 @@ void StableDiffusion::_bind_methods() {
 		DEFVAL(Ref<ImageTexture>())
 	);
 
+	ClassDB::bind_method("_on_txt2img_complete", &StableDiffusion::_on_txt2img_complete);
+
 	ClassDB::bind_method(D_METHOD("get_result", "result"), &StableDiffusion::get_result, DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("get_last_result"), &StableDiffusion::get_last_result);
 
 	ClassDB::bind_method(D_METHOD("get_num_cpus"), &StableDiffusion::get_num_cpus);
 
@@ -763,6 +936,12 @@ void StableDiffusion::_bind_methods() {
 	BIND_CONSTANT(STD_DEFAULT_RNG);
 	BIND_CONSTANT(CUDA_RNG);
 
-	ADD_SIGNAL(MethodInfo("ctx_preloaded"));
+	ADD_SIGNAL(
+		MethodInfo("ctx_preloaded")
+	);
 	ADD_SIGNAL(MethodInfo("generation_complete"));
+
+	ADD_SIGNAL(MethodInfo("ggml_tensors_init"));
+
+	ADD_SIGNAL(MethodInfo("txt2img_complete"));
 }

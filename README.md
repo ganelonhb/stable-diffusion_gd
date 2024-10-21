@@ -3,11 +3,12 @@ A C++ module for Godot to interact with Stable-Diffusion.cpp.
 
 ## Todo
 
-☐ URGENT A thread for the execution of both context loading and image generation<br>
+☑ ~~Improved API access to stable-diffusion.cpp for custom txt2img implementation~~<br>
+☑ ~~URGENT A thread for the execution of both context loading and image generation~~<br>
+
 ☐ URGENT Actual Windows and Mac build support...<br>
 ☐ Support for img2img<br>
 ☐ Support for loading model from user::/<br>
-☐ Improved API access to stable-diffusion.cpp for custom txt2img implementation<br>
 ☐ Custom GGML backend for loading from buffer<br>
 ☐ Suport for loading model from res::/
 

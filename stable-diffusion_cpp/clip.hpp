@@ -4,9 +4,13 @@
 #include "ggml_extend.hpp"
 #include "model.h"
 
+#ifndef __STATIC_INLINE__
+#define __STATIC_INLINE__ static inline
+#endif
+
 /*================================================== CLIPTokenizer ===================================================*/
 
-std::pair<std::unordered_map<std::string, float>, std::string> extract_and_remove_lora(std::string text) {
+__STATIC_INLINE__ std::pair<std::unordered_map<std::string, float>, std::string> extract_and_remove_lora(std::string text) {
     std::regex re("<lora:([^:]+):([^>]+)>");
     std::smatch matches;
     std::unordered_map<std::string, float> filename2multiplier;
@@ -31,7 +35,7 @@ std::pair<std::unordered_map<std::string, float>, std::string> extract_and_remov
     return std::make_pair(filename2multiplier, text);
 }
 
-std::vector<std::pair<int, std::u32string>> bytes_to_unicode() {
+__STATIC_INLINE__ std::vector<std::pair<int, std::u32string>> bytes_to_unicode() {
     std::vector<std::pair<int, std::u32string>> byte_unicode_pairs;
     std::set<int> byte_set;
     for (int b = static_cast<int>('!'); b <= static_cast<int>('~'); ++b) {
