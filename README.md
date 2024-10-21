@@ -101,7 +101,7 @@ void free_ctx();
 Free the Stable Diffusion context. The destructor will also do this, but you can call this if you no longer need the Stable Diffusion context during a scene and would like to reclaim the VRAM.
 
 ```cpp
-bool txt2img(
+void txt2img(
 	String prompt = "",
 	String negative_prompt = "",
 	ImageTexture control_image = ImageTexture()
@@ -114,5 +114,11 @@ Generate an image using the prompt, negative prompt, and control image. By defau
 ImageTexture get_result(int result = 0);
 ```
 
-Get the generated image as an ImageTexture. You must have generated an image/some images for this to return anything other than a null ImageTexture. If youc all this method with no arguments, it will simply use the first image you ever generated.
+Get the generated image as an ImageTexture. You must have generated an image/some images for this to return anything other than a null ImageTexture. If you call this method with no arguments, it will simply use the first image you ever generated.
 
+
+```cpp
+ImageTexture get_last_result();
+```
+
+Get the last (most recent) generated image as an ImageTexture.
