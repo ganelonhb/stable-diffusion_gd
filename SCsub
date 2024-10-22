@@ -1,12 +1,55 @@
+from SCons.Errors import UserError
+
 Import('env')
+
+PLATFORM = env['platform']
+supported = []
+
+print(PLATFORM)
+if PLATFORM == 'windows' or PLATFORM == 'linuxbsd':
+    supported = ['cpu', 'cuda', 'cublas', 'rocm', 'hipblas']
+elif PLATFORM == 'macos':
+    supported = ['cpu', 'metal']
+
+backend = ARGUMENTS.get('backend', 'cpu')
+
+if backend not in supported:
+    raise UserError(f'Error: unsupported backend "{backend}" for platform {PLATFORM}. Supported backends: {", ".join(supported)}')
+
+print(f"Using {backend} backend.")
 
 env_sd = env.Clone()
 env_sd.add_source_files(env.modules_sources, "*.cpp")
 
 env_sd.Append(CPPPATH=["stable-diffusion_cpp/", "stable-diffusion_cpp/thirdparty", "stable-diffusion_cpp/ggml/include", "stable-diffusion_cpp/ggml/ggml/include", "stable-diffusion_cpp/ggml/ggml/src", "stable-diffusion_cpp/ggml/src",])
 
-env_sd.Append(CCFLAGS=['-fexceptions'])
+if PLATFORM == 'linuxbsd':
+    env_sd.Append(CCFLAGS=['-fexceptions'])
 
-env.Append(LIBPATH=["libs"])
+    if backend == 'cpu':
+        env.Append(LIBPATH=["libs/platform/linuxbsd/cpu/"])
 
-env.Append(LIBS=[env.File("libs/libstable-diffusion.a"), env.File("libs/libggml.a"), env.File("/usr/lib/libgomp.so"), env.File("/usr/lib/libpthread.a")])
+        env.Append(LIBS=[env.File("libs/platform/linuxbsd/cpu/libstable-diffusion.a"), env.File("libs/platform/linuxbsd/cpu/libggml.a"), env.File("/usr/lib/libgomp.so"), env.File("/usr/lib/libpthread.a")])
+    elif backend == 'cuda' or backend == 'cublas':
+        env.Append(LIBPATH=["libs/platform/linuxbsd/cuda/"])
+
+        env.Append(LIBS=[env.File("libs/platform/linuxbsd/cuda/libstable-diffusion.a"), env.File("libs/platform/linuxbsd/cuda/libggml.a"), env.File("/usr/lib/libgomp.so"), env.File("/usr/lib/libpthread.a"), env.File("/opt/cuda/targets/x86_64-linux/lib/libcudart.so"), env.File("/opt/cuda/targets/x86_64-linux/lib/libcublas.so"), env.File("/opt/cuda/targets/x86_64-linux/lib/libculibos.a"), env.File("/opt/cuda/targets/x86_64-linux/lib/libcublasLt.so"), env.File("/opt/cuda/targets/x86_64-linux/lib/stubs/libcuda.so"), "dl", env.File("/usr/lib/librt.a"), "m"])
+    elif backend == 'rocm' or backend == 'hipblas': # TODO: somebody with an AMD GPU figure out necessary libs to link with hipblas.
+        ...
+if PLATFORM == 'windows': # TODO: Windows platform
+    env_sd.Append(CCFLAGS=['-fexceptions'])
+
+    if backend == 'cpu':
+        ...
+    elif backend == 'cuda' or backend == 'cublas':
+        ...
+    elif backend == 'rocm' or backend == 'hipblas':
+        ...
+
+if PLATFORM == 'macos': # TODO: MacOS Platform
+    env_sd.Append(CCFLAGS=['-fexceptions'])
+
+    if backend == 'cpu':
+        ...
+    elif backend == 'metal':
+        ...

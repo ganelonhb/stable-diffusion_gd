@@ -5,14 +5,24 @@ A C++ module for Godot to interact with Stable-Diffusion.cpp.
 
 ☑ ~~Improved API access to stable-diffusion.cpp for custom txt2img implementation~~<br>
 ☑ ~~URGENT A thread for the execution of both context loading and image generation~~<br>
+☑ ~~LinuxBSD CPU build support~~<br>
+☑ ~~LinuxBSD CuBLAS build support~~<br>
 
-☐ URGENT Actual Windows and Mac build support...<br>
+☐ LinuxBSD HipBLAS build support<br>
+
+☐ NT CPU build support<br>
+☐ NT CuBLAS build support<br>
+☐ NT HipBLAS build support<br>
+
+☐ MacOS CPU build support<br>
+☐ MacOS Metal build support<br>
+
 ☐ Support for img2img<br>
 ☐ Support for loading model from user::/<br>
 ☐ Custom GGML backend for loading from buffer<br>
 ☐ Suport for loading model from res::/
 
-☐ Volk support...?
+☐ Volk support...? Probably not very fun or likely.
 
 ## Building
 
