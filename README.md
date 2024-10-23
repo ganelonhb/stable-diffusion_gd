@@ -28,11 +28,12 @@ A C++ module for Godot to interact with Stable-Diffusion.cpp.
 
 To get up-and-running, you will want to clone the code onto your machine, then follow these steps.
 
-1. cd into the stable_diffusion_gd directory.
-2. Compile stable diffusion with a backend of your choice (See [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp)) (as of now, vulkan support is borked thanks to Godot's use of Volk).
-3. Find both libstable-diffusion and libggml, and drop them into the proper directory in libs/
-4. Copy the directory into your local copy of godot/modules/
-5. Build Godot using Scons like you would any other module!
+1. After cloning the code, copy it into your Godot source tree under `godot/modules/stable_diffusion_gd/`
+2. cd into the stable_diffusion_gd directory.
+3. Compile stable diffusion with a backend of your choice (See [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp)) (as of now, vulkan support is borked thanks to Godot's use of Volk).
+4. Find both libstable-diffusion and libggml, and drop them into the proper directory in libs/
+5. Copy the directory into your local copy of godot/modules/
+6. Build Godot using Scons like you would any other module!
 
 ## Usage
 
